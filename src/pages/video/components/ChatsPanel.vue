@@ -13,37 +13,75 @@
 
 <script>
 import TextBox from './TextBox.vue'
+import io from '../../../../node_modules/socket.io-client/dist/socket.io.js';
+
 export default {
-  props: {
-    messages: {
-      default: function () {
-        return [
-          {id: 0, text: 'test_message_0'},
-          {id: 1, text: 'test_message_1'},
-          {id: 2, text: 'test_message_2'},
-        ]
-      }
+
+  props: ['socket'],
+
+  watch: {
+    socket: function() {
+      this.startSocketIO();
     }
+
   },
+
+  // State variables.
+  // ================
   data: function () {
     return {
-      chat: ''
+      messages: [],
+      chat: '',
+      verbose: true // On/off flag for log() method
     }
   },
+
+  // Controller methods.
+  // ===================
   methods: {
-    sendMessage: function () {
-      var message = {
-        id: this.messages.length,
-        text: this.chat
+
+    // Convenience method for logging debugging messages
+    log: function() {
+      this.verbose && console.log.apply(console, arguments);
+    },
+
+    // Connect to Signal Server and initiate listeners
+    startSocketIO: function() {
+      this.socket.on('message', (message) => {
+        console.log('ENORMOUS SUCCESSS!', this.messages, message);
+        this.messages.push(message);
+      });
+
+    },
+
+    sendMessage: function() {
+
+      if (this.socket !== null) {
+
+        console.log('sendMessage: ', this.socket.id);
+
+        var data = {
+          room: 'test',
+          message: {
+            id: this.messages.length,
+            text: this.chat
+          }
+        };
+
+        this.socket.emit('message', data);
+        this.messages.push(data.message);
+      } else {
+        console.log('WARNING! FAIL!!');
       }
 
-      this.chat = ''
-      this.messages.push(message)
-    },
+      this.chat = '';
+    }
   },
+
   components: {
     TextBox
   }
+
 }
 
 </script>

@@ -34,7 +34,7 @@ export default {
       remoteVideoStream: null,  // Set by handleAddStream().
       rtcpc: null, // The RTCPeerConnection, set by createPeerConnection().
       isCaller: null, // Caller or Callee, set by startSocketIO().
-      socket: null,  // Socket.io connection to signal server, set by startSocketIO().
+      socket: false,  // Socket.io connection to signal server, set by startSocketIO().
       room: 'test', // Room name, TODO: Strategy for assigning roomnames for each pair
       verbose: true // Set to true for debug logging
     };
@@ -58,6 +58,8 @@ export default {
       this.log(`Attempting to join or create room "${this.room}"...`);
       this.socket.emit('enter room', this.room);
 
+      //this.$emit('CONNECTED!');
+
       // LISTENERS
 
       // Occurs if we are the first client in the room
@@ -76,7 +78,7 @@ export default {
 
       // Occurs when another party joins our room
       this.socket.on('callee joined', (room) => {
-        this.log('Callee has joined room "${room}"');
+        this.log(`Callee has joined room "${room}"`);
         // It is now safe to initiate call
         this.isCaller && this.sendOffer();
       });
